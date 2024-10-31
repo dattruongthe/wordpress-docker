@@ -1,0 +1,38 @@
+services:
+    nginx:
+        image: nginx:alpine
+        restart: always
+        ports:
+            - "8080:443"
+        environment:
+            PHP_FPM_PORT: 9000
+            SERVER_NAME: wordpress.local
+        volumes:
+            - ./public_html:/var/www/html/public_html
+            - ./docker/nginx/templates:/etc/nginx/templates
+            - ./certs/nginx-selfsigned.crt:/etc/nginx/certs/nginx-selfsigned.crt
+            - ./certs/nginx-selfsigned.key:/etc/nginx/certs/nginx-selfsigned.key
+    db:
+        image: mariadb:10.6.19
+        restart: always
+        environment:
+            MARIADB_ROOT_PASSWORD: root
+            MARIADB_DATABASE: wordpress
+        volumes:
+            - ./docker/mysql:/var/lib/mysql
+        ports:
+            - "3306:3306"
+    php:
+        image: php:8.2-fpm
+        build:
+            context: ./docker/php
+        ports:
+            - "9001:9000"
+        working_dir: /var/www/html/
+        volumes:
+            - ./public_html:/var/www/html/public_html
+        environment:
+            WEB_DOMAIN: wordpress.local
+            WEB_PORT: 8080
+        depends_on:
+            - db

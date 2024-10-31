@@ -1,0 +1,6 @@
+.idea
+/public_html/
+.docker-build
+auth.json
+docker/mysql/*
+.idea/*
